@@ -134,6 +134,7 @@ async function notionRequest(
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const res = await fetch(`${API}${path}`, {
       ...init,
+      signal: AbortSignal.timeout(30_000),
       headers: {
         Authorization: `Bearer ${token}`,
         "Notion-Version": NOTION_VERSION,

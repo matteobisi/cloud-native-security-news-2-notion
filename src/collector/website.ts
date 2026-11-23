@@ -38,6 +38,7 @@ export async function collectWebsite(
 ): Promise<WebsiteResult> {
   const res = await fetchImpl(source.url, {
     headers: { "User-Agent": "cloud-native-security-news-digest" },
+    signal: AbortSignal.timeout(30_000),
   });
   if (!res.ok) {
     throw new Error(`${source.name} responded ${res.status}`);

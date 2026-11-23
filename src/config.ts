@@ -38,8 +38,8 @@ function readPipeline(root: string): PipelineConfig {
   const file = path.join(root, "config", "pipeline.yaml");
   const doc = parse(fs.readFileSync(file, "utf8")) as PipelineConfig;
   doc.model.baseUrl =
-    process.env.MODEL_BASE_URL || process.env.LLM_URL || doc.model.baseUrl;
-  doc.model.name = process.env.MODEL_NAME || process.env.LLM_MODEL || doc.model.name;
+    process.env.LLM_URL || process.env.MODEL_BASE_URL || doc.model.baseUrl;
+  doc.model.name = process.env.LLM_MODEL || process.env.MODEL_NAME || doc.model.name;
   return doc;
 }
 

@@ -68,3 +68,32 @@ test("groupByCategory groups preserving order", () => {
   ]);
   assert.deepEqual(groups.map(([name]) => name), ["b", "a"]);
 });
+
+test("includes top stories and a footer with the window and model", () => {
+  const blocks = buildBlocks(
+    digest([
+      item({ id: "1", title: "first", url: "https://example.com/1" }),
+      item({ id: "2", title: "second", url: "https://example.com/2" }),
+    ]),
+  );
+  const headings = blocks
+    .filter((block) => block.type === "heading_2")
+    .map((block) => (block.heading_2 as { rich_text: Array<{ text: { content: string } }> })
+      .rich_text[0].text.content);
+  assert.ok(headings.includes("Top stories"));
+
+  const footer = blocks.at(-1) as { paragraph: { rich_text: Array<{ text: { content: string } }> } };
+  const text = footer.paragraph.rich_text[0].text.content;
+  assert.ok(text.includes("Window:"));
+  assert.ok(text.includes("Model:"));
+});
+
+test("reports omitted items when the cap trims the digest", () => {
+  const withOmitted = { ...digest([item({})]), omitted: 7 };
+  const blocks = buildBlocks(withOmitted);
+  const texts = blocks
+    .filter((block) => block.type === "paragraph")
+    .map((block) => (block.paragraph as { rich_text: Array<{ text: { content: string } }> })
+      .rich_text[0].text.content);
+  assert.ok(texts.some((text) => text.includes("7 additional qualifying items")));
+});

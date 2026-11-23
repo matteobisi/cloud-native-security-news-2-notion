@@ -33,14 +33,16 @@ export async function collectAll(
       if (source.type === "github_release" || source.type === "github_repo") {
         const found = await collectGitHub(source, since, pipeline.limits.maxItemsPerSource);
         items.push(...found);
-        const newest = found
-          .map((item) => item.publishedAt)
-          .sort()
-          .at(-1);
-        state.sources[source.key] = {
-          lastSeenId: found[0]?.id ?? previous?.lastSeenId,
-          lastSeenAt: newest ?? now.toISOString(),
-        };
+        if (found.length > 0) {
+          const newest = found
+            .map((item) => item.publishedAt)
+            .sort()
+            .at(-1);
+          state.sources[source.key] = {
+            lastSeenId: found[0].id,
+            lastSeenAt: newest,
+          };
+        }
       } else if (source.type === "website") {
         const result = await collectWebsite(source, previous?.lastSeenId);
         items.push(...result.items);

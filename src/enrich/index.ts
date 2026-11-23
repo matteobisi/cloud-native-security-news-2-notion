@@ -59,11 +59,17 @@ export async function enrich(
   if (candidates.length === 0) return [];
 
   let judgements: Judgement[] = [];
-  try {
-    const raw = await callJsonModel(pipeline.model, buildPrompt(candidates));
-    if (Array.isArray(raw)) judgements = raw as Judgement[];
-  } catch (error) {
-    console.warn(`enrichment fell back to rules: ${(error as Error).message}`);
+  const batchSize = 40;
+  for (let index = 0; index < candidates.length; index += batchSize) {
+    try {
+      const raw = await callJsonModel(
+        pipeline.model,
+        buildPrompt(candidates.slice(index, index + batchSize)),
+      );
+      if (Array.isArray(raw)) judgements.push(...(raw as Judgement[]));
+    } catch (error) {
+      console.warn(`enrichment batch fell back to rules: ${(error as Error).message}`);
+    }
   }
 
   const byId = new Map(judgements.map((judgement) => [judgement.id, judgement]));

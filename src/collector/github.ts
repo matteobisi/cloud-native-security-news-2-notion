@@ -37,7 +37,7 @@ export async function collectGitHub(
 
   const res = await fetchImpl(
     `${GITHUB_API}/repos/${repo.owner}/${repo.repo}/releases?per_page=${perSource}`,
-    { headers },
+    { headers, signal: AbortSignal.timeout(30_000) },
   );
   if (!res.ok) {
     throw new Error(`GitHub ${repo.owner}/${repo.repo} responded ${res.status}`);

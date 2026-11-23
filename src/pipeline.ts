@@ -1,5 +1,5 @@
 import { mergeIntoBuffer, type CollectResult } from "./collector";
-import { selectForDigest } from "./rank";
+import { dedupe, selectForDigest } from "./rank";
 import type { State } from "./state/store";
 import type {
   Digest,
@@ -32,6 +32,8 @@ export interface StateStore {
   load(): State;
   save(state: State): void;
   savePending(digest: Digest): string;
+  listPending?(): Array<{ path: string; digest: Digest }>;
+  removePending?(path: string): void;
 }
 
 /** Environment/token access, injected so tests never read the real process env. */
@@ -131,6 +133,23 @@ export async function runPipeline(
 
   const state = store.load();
   const now = deps.now();
+  const token = env.get("NOTION_TOKEN");
+  const parentPageId = env.get("NOTION_PARENT_PAGE_ID");
+
+  if (!dryRun && token && parentPageId && store.listPending && store.removePending) {
+    for (const pending of store.listPending()) {
+      try {
+        const published = await publish(pending.digest, parentPageId, token);
+        store.removePending(pending.path);
+        log(`retried pending digest -> ${published.url}`);
+        if (!state.lastPublishedAt || pending.digest.windowEnd > state.lastPublishedAt) {
+          state.lastPublishedAt = pending.digest.windowEnd;
+        }
+      } catch (error) {
+        warn(`pending digest still failing: ${(error as Error).message}`);
+      }
+    }
+  }
 
   log(`scanning ${sources.length} sources`);
   const collected = await collect(sources, config, state, now);
@@ -140,17 +159,20 @@ export async function runPipeline(
 
   mergeIntoBuffer(state, collected.items);
 
+  const bufferCap = subtractDays(now, config.cadence.maxWindowDays);
+  state.buffer = state.buffer.filter((item) => new Date(item.publishedAt) >= bufferCap);
+
   if (state.buffer.length === 0) {
     log("nothing pending; skipping");
     if (!dryRun) store.save(state);
-    return { status: "skipped-empty-buffer", errors, exitCode: 0 };
+    return { status: "skipped-empty-buffer", errors, exitCode: errors.length > 0 ? 1 : 0 };
   }
 
   log("enriching items");
   const enriched = await enrich(state.buffer, config);
   const start = windowStart(state, config, now);
-  const qualifying = enriched.filter(
-    (item) => item.qualifying && new Date(item.publishedAt) >= start,
+  const qualifying = dedupe(
+    enriched.filter((item) => item.qualifying && new Date(item.publishedAt) >= start),
   );
 
   const forced = dueToPublish(state, config, now);
@@ -159,24 +181,22 @@ export async function runPipeline(
       `${qualifying.length} qualifying item(s) < ${config.cadence.minQualifyingItems}; holding until next run`,
     );
     if (!dryRun) store.save(state);
-    return { status: "held", errors, exitCode: 0 };
+    return { status: "held", errors, exitCode: errors.length > 0 ? 1 : 0 };
   }
 
   if (qualifying.length === 0) {
     log("no qualifying items in window; nothing to publish");
     if (!dryRun) store.save(state);
-    return { status: "skipped-no-qualifying", errors, exitCode: 0 };
+    return { status: "skipped-no-qualifying", errors, exitCode: errors.length > 0 ? 1 : 0 };
   }
 
   const selected = selectForDigest(qualifying, config.limits.maxItemsPerDigest);
   const digest = buildDigest(selected.items, selected.omitted, config, start, now, collected.scanned);
 
   if (dryRun) {
-    return { status: "dry-run", errors, exitCode: 0, digest };
+    return { status: "dry-run", errors, exitCode: errors.length > 0 ? 1 : 0, digest };
   }
 
-  const token = env.get("NOTION_TOKEN");
-  const parentPageId = env.get("NOTION_PARENT_PAGE_ID");
   if (!token || !parentPageId) {
     throw new Error("NOTION_TOKEN and NOTION_PARENT_PAGE_ID must be set");
   }
