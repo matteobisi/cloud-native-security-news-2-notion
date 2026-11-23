@@ -18,7 +18,11 @@ export type Collect = (
 ) => Promise<CollectResult>;
 
 /** Judge and describe buffered items. */
-export type Enrich = (items: Item[], pipeline: PipelineConfig) => Promise<EnrichedItem[]>;
+export type Enrich = (
+  items: Item[],
+  pipeline: PipelineConfig,
+  options?: { warn?(line: string): void },
+) => Promise<EnrichedItem[]>;
 
 /** Publish one digest and return its page id and url. */
 export type Publish = (
@@ -168,7 +172,7 @@ export async function runPipeline(
   }
 
   log("enriching items");
-  const enriched = await enrich(state.buffer, config);
+  const enriched = await enrich(state.buffer, config, { warn });
   const start = windowStart(state, config, now);
   const qualifying = dedupe(
     enriched.filter((item) => item.qualifying && new Date(item.publishedAt) >= start),
