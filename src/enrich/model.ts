@@ -15,7 +15,7 @@ export async function callJsonModel(
   fetchImpl: FetchLike = fetch,
 ): Promise<unknown> {
   const res = await fetchImpl(`${model.baseUrl}/chat/completions`, {
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(300_000),
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

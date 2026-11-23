@@ -72,7 +72,7 @@ export async function enrich(
   if (candidates.length === 0) return [];
 
   let judgements: Judgement[] = [];
-  const batchSize = 40;
+  const batchSize = 8;
   for (let index = 0; index < candidates.length; index += batchSize) {
     try {
       const raw = await callJsonModel(
