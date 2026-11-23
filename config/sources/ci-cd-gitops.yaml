@@ -1,0 +1,41 @@
+category: ci-cd-gitops
+description: "Jenkins, ArgoCD, Flux, Tekton, pipeline security, deployment automation"
+priority: HIGH
+
+sources:
+  # CI/CD Orchestration
+  - name: Jenkins
+    url: https://www.jenkins.io/changelog/
+    type: website
+    notes: "Check changelog page for releases"
+
+  - name: GitLab CI
+    url: https://about.gitlab.com/releases/categories/releases/
+    type: website
+    notes: "GitLab releases page"
+
+  - name: GitHub Actions
+    url: https://github.blog/changelog/label/actions/
+    type: website
+    notes: "GitHub Actions changelog"
+
+  # Kubernetes-Native CI/CD
+  - name: Tekton Pipelines
+    url: https://github.com/tektoncd/pipeline/releases
+    type: github_release
+
+  - name: ArgoCD
+    url: https://github.com/argoproj/argo-cd/releases
+    type: github_release
+
+  - name: Flux
+    url: https://github.com/fluxcd/flux2/releases
+    type: github_release
+
+  - name: Argo Workflows
+    url: https://github.com/argoproj/argo-workflows/releases
+    type: github_release
+
+  - name: Argo Rollouts
+    url: https://github.com/argoproj/argo-rollouts/releases
+    type: github_release

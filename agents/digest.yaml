@@ -1,0 +1,25 @@
+version: "16"
+
+models:
+  local:
+    provider: dmr
+    model: ai/gemma3:12b-q4_K_M
+    max_tokens: 4096
+    provider_opts:
+      context_size: 8192
+
+agents:
+  root:
+    model: local
+    description: Run the cloud-native security newsletter pipeline
+    instruction: |
+      You run the cloud-native security newsletter pipeline.
+      Execute exactly this command and nothing else:
+
+        node dist/cli.js run
+
+      If it exits non-zero, report the error and stop. Never invent results.
+      Finish with a one-line summary of what was published.
+    toolsets:
+      - type: shell
+      - type: think

@@ -1,0 +1,23 @@
+category: infrastructure-as-code
+description: "Terraform, Pulumi, CloudFormation security, infrastructure automation, policy as code"
+priority: MEDIUM
+
+sources:
+  # IaC Frameworks
+  - name: HashiCorp Terraform
+    url: https://github.com/hashicorp/terraform/releases
+    type: github_release
+
+  - name: OpenTofu
+    url: https://github.com/opentofu/opentofu/releases
+    type: github_release
+    notes: "Open source Terraform fork"
+
+  - name: Pulumi
+    url: https://github.com/pulumi/pulumi/releases
+    type: github_release
+
+  - name: Crossplane
+    url: https://github.com/crossplane/crossplane/releases
+    type: github_release
+    notes: "Kubernetes-native infrastructure management"

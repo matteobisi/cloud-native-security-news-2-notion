@@ -1,0 +1,32 @@
+category: observability
+description: "Prometheus, Grafana, Loki, security monitoring, audit logging, metrics"
+priority: MEDIUM
+
+sources:
+  # Metrics & Monitoring
+  - name: Prometheus
+    url: https://github.com/prometheus/prometheus/releases
+    type: github_release
+
+  - name: Grafana
+    url: https://github.com/grafana/grafana/releases
+    type: github_release
+
+  # Logging & Log Aggregation
+  - name: Loki
+    url: https://github.com/grafana/loki/releases
+    type: github_release
+
+  # Distributed Tracing
+  - name: Jaeger
+    url: https://github.com/jaegertracing/jaeger/releases
+    type: github_release
+
+  - name: Tempo
+    url: https://github.com/grafana/tempo/releases
+    type: github_release
+
+  # Observability Standards
+  - name: OpenTelemetry Collector
+    url: https://github.com/open-telemetry/opentelemetry-collector/releases
+    type: github_release
