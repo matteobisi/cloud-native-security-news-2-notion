@@ -1,5 +1,11 @@
 export type Priority = "CRITICAL" | "HIGH" | "MEDIUM";
 
+/**
+ * The subset of `fetch` the source adapters use. Adapters default to the global
+ * fetch and accept an injected implementation, so they can be driven offline.
+ */
+export type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
+
 export type SourceType = "github_release" | "github_repo" | "website" | "mailing_list";
 
 export interface SourceConfig {
