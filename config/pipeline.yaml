@@ -1,0 +1,47 @@
+categories:
+  - cloud-native-k8s
+  - security-tools
+  - compliance-scanning
+  - ci-cd-gitops
+  - container-build
+
+cadence:
+  # Publish only when at least this many qualifying items are buffered.
+  minQualifyingItems: 3
+  # Always publish when nothing has been published for this long.
+  forcePublishAfterDays: 30
+  # Never look further back than this, even after a long gap.
+  maxWindowDays: 35
+  # First run with no prior digest covers this many days.
+  bootstrapWindowDays: 7
+
+limits:
+  maxItemsPerDigest: 25
+  maxItemsPerSource: 10
+
+model:
+  baseUrl: http://localhost:12434/engines/v1
+  name: ai/gemma3:12b-q4_K_M
+  temperature: 0.2
+  maxTokens: 4096
+
+securitySignals:
+  - CVE-
+  - CWE-
+  - vulnerability
+  - advisory
+  - security
+  - authentication
+  - authorization
+  - RBAC
+  - TLS
+  - exploit
+  - patch
+  - secret
+  - supply chain
+  - injection
+  - XSS
+
+paths:
+  sourcesDir: config/sources
+  stateDir: state

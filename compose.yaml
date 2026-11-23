@@ -1,0 +1,20 @@
+services:
+  digest:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      MODEL_BASE_URL: http://model-runner.docker.internal/engines/v1
+    volumes:
+      - ./config:/app/config:ro
+      - ./state:/app/state
+    models:
+      llm:
+        endpoint_var: LLM_URL
+        model_var: LLM_MODEL
+
+models:
+  llm:
+    model: ai/gemma3:12b-q4_K_M
+    context_size: 8192

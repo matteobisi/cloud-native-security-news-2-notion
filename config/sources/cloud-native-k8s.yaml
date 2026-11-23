@@ -1,0 +1,95 @@
+category: cloud-native-k8s
+description: "Kubernetes, container runtimes, networking, service mesh security"
+priority: CRITICAL
+
+sources:
+  # Kubernetes Core
+  - name: Kubernetes
+    url: https://github.com/kubernetes/kubernetes/releases
+    type: github_release
+    changelog: https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG
+    cve_feed: https://kubernetes.io/docs/reference/issues-security/official-cve-feed/
+    notes: "Core K8s releases and security patches"
+
+  - name: Kubernetes KEPs
+    url: https://github.com/kubernetes/enhancements/tree/master/keps
+    type: github_repo
+    notes: "Kubernetes Enhancement Proposals - upcoming features"
+
+  # Container Runtime
+  - name: Apple Container
+    url: https://github.com/apple/container/releases
+    type: github_release
+
+  - name: Podman
+    url: https://github.com/containers/podman/releases
+    type: github_release
+
+  - name: CRI-O
+    url: https://github.com/cri-o/cri-o/releases
+    type: github_release
+
+  - name: Containerd
+    url: https://github.com/containerd/containerd/releases
+    type: github_release
+
+  - name: Docker (Moby)
+    url: https://github.com/moby/moby/releases
+    type: github_release
+
+  # Networking & Service Mesh
+  - name: Istio
+    url: https://github.com/istio/istio/releases
+    type: github_release
+
+  - name: Linkerd
+    url: https://github.com/linkerd/linkerd2/releases
+    type: github_release
+
+  - name: Cilium
+    url: https://github.com/cilium/cilium/releases
+    type: github_release
+
+  - name: Calico
+    url: https://github.com/projectcalico/calico/releases
+    type: github_release
+
+  - name: CoreDNS
+    url: https://github.com/coredns/coredns/releases
+    type: github_release
+
+  # Certificate Management
+  - name: cert-manager
+    url: https://github.com/cert-manager/cert-manager/releases
+    type: github_release
+
+  - name: trust-manager
+    url: https://github.com/cert-manager/trust-manager/releases
+    type: github_release
+
+  # Backup & Disaster Recovery
+  - name: Velero
+    url: https://github.com/vmware-tanzu/velero/releases
+    type: github_release
+
+  - name: Kasten K10
+    url: https://docs.kasten.io/latest/releasenotes.html
+    type: website
+    notes: "Check release notes page"
+
+  # Developer Tools & Package Managers
+  - name: Helm
+    url: https://github.com/helm/helm/releases
+    type: github_release
+
+  - name: Kustomize
+    url: https://github.com/kubernetes-sigs/kustomize/releases
+    type: github_release
+
+  - name: Skaffold
+    url: https://github.com/GoogleContainerTools/skaffold/releases
+    type: github_release
+
+  - name: Tilt
+    url: https://github.com/tilt-dev/tilt/releases
+    type: github_release

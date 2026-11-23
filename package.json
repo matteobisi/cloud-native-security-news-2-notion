@@ -1,0 +1,23 @@
+{
+  "name": "cloud-native-security-news-2-notion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first cloud-native security newsletter pipeline using Docker Agent, Docker Model Runner and Notion",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/cli.js run",
+    "run": "tsx src/cli.ts run",
+    "dry-run": "tsx src/cli.ts run --dry-run",
+    "reset": "tsx src/cli.ts reset",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

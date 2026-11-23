@@ -1,0 +1,75 @@
+category: security-tools
+description: "Vault, OPA, Kyverno, Falco, supply chain security, vulnerability scanning"
+priority: CRITICAL
+
+sources:
+  # Secrets Management
+  - name: OpenBao
+    url: https://github.com/openbao/openbao/releases
+    type: github_release
+    notes: "Open source fork of Vault"
+
+  - name: HashiCorp Vault
+    url: https://github.com/hashicorp/vault/releases
+    type: github_release
+
+  - name: CyberArk Secrets Manager
+    url: https://github.com/cyberark/conjur/releases/
+    type: github_release
+    notes: "Use Conjur releases for updates"
+
+  - name: External Secrets Operator
+    url: https://github.com/external-secrets/external-secrets/releases
+    type: github_release
+
+  # Access Control & Policy
+  - name: HashiCorp Boundary
+    url: https://github.com/hashicorp/boundary/releases
+    type: github_release
+
+  - name: Open Policy Agent (OPA)
+    url: https://github.com/open-policy-agent/opa/releases
+    type: github_release
+
+  - name: Kyverno
+    url: https://github.com/kyverno/kyverno/releases
+    type: github_release
+
+  - name: Gatekeeper
+    url: https://github.com/open-policy-agent/gatekeeper/releases
+    type: github_release
+
+  # Vulnerability Scanning & SBOM
+  - name: Trivy
+    url: https://github.com/aquasecurity/trivy/releases
+    type: github_release
+
+  - name: Grype
+    url: https://github.com/anchore/grype/releases
+    type: github_release
+    notes: "Vulnerability scanner"
+
+  - name: Syft
+    url: https://github.com/anchore/syft/releases
+    type: github_release
+    notes: "SBOM generation tool"
+
+  # Runtime Security & Monitoring
+  - name: Falco
+    url: https://github.com/falcosecurity/falco/releases
+    type: github_release
+
+  - name: Tetragon
+    url: https://github.com/cilium/tetragon/releases
+    type: github_release
+    notes: "eBPF-based security observability"
+
+  # Code & IaC Scanning
+  - name: Checkov
+    url: https://github.com/bridgecrewio/checkov/releases
+    type: github_release
+
+  # Signing & Supply Chain
+  - name: Cosign
+    url: https://github.com/sigstore/cosign/releases
+    type: github_release

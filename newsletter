@@ -1,0 +1,15 @@
+#!/bin/zsh
+set -euo pipefail
+
+REPO_DIR="${0:A:h}"
+cd "$REPO_DIR"
+
+case "${1:-run}" in
+  run)     docker agent run --exec --safety restricted agents/digest.yaml ;;
+  dry-run) docker compose run --rm digest node dist/cli.js run --dry-run ;;
+  reset)   docker compose run --rm digest node dist/cli.js reset ;;
+  schedule) docker compose run --rm digest node dist/cli.js schedule ;;
+  up)      docker compose up --build ;;
+  build)   docker compose build ;;
+  *)       echo "usage: ./newsletter <run|dry-run|reset|schedule|up|build>" ;;
+esac

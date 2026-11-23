@@ -1,0 +1,28 @@
+category: container-build
+description: "Container image security, build tools, image scanning, registry security"
+priority: HIGH
+
+sources:
+  # Container Build Tools
+  - name: Buildah
+    url: https://github.com/containers/buildah/releases
+    type: github_release
+
+  - name: Kaniko
+    url: https://github.com/GoogleContainerTools/kaniko/releases
+    type: github_release
+    notes: "Build container images in Kubernetes"
+
+  - name: BuildKit
+    url: https://github.com/moby/buildkit/releases
+    type: github_release
+
+  - name: APKO
+    url: https://github.com/chainguard-dev/apko/releases
+    type: github_release
+    notes: "APK-based OCI image builder"
+
+  - name: Melange
+    url: https://github.com/chainguard-dev/melange/releases
+    type: github_release
+    notes: "APK package builder for APKO"

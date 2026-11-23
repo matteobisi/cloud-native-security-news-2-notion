@@ -1,0 +1,68 @@
+category: infrastructure-databases
+description: "Linux kernel, database security (PostgreSQL, MySQL, Redis), infrastructure hardening"
+priority: MEDIUM
+
+sources:
+  # Linux & Kernel
+  - name: Ubuntu Server
+    url: https://releases.ubuntu.com/
+    type: website
+    notes: "Ubuntu releases page"
+
+  - name: Red Hat Enterprise Linux
+    url: https://access.redhat.com/articles/red-hat-enterprise-linux-release-dates
+    type: website
+    notes: "RHEL release dates"
+
+  - name: Linux Kernel
+    url: https://www.kernel.org/
+    type: website
+    notes: "Kernel releases"
+
+  - name: Linux CVEs
+    url: https://nvd.nist.gov/vuln/search/results?query=linux%20kernel
+    type: website
+    notes: "Linux kernel vulnerabilities"
+
+  # Databases
+  - name: PostgreSQL
+    url: https://www.postgresql.org/support/versioning/
+    type: website
+    notes: "PostgreSQL versioning and releases"
+
+  - name: MySQL
+    url: https://dev.mysql.com/doc/relnotes/mysql/8.4/en/
+    type: website
+    notes: "MySQL release notes"
+
+  - name: MongoDB
+    url: https://www.mongodb.com/docs/manual/release-notes/
+    type: website
+    notes: "MongoDB release notes"
+
+  - name: Redis
+    url: https://github.com/redis/redis/releases
+    type: github_release
+
+  - name: etcd
+    url: https://github.com/etcd-io/etcd/releases
+    type: github_release
+
+  # Web Servers & API Gateways
+  - name: Nginx
+    url: https://nginx.org/en/CHANGES
+    type: website
+    notes: "Nginx changelog"
+
+  - name: Apache HTTP Server
+    url: https://httpd.apache.org/download.cgi
+    type: website
+    notes: "Apache HTTPD downloads"
+
+  - name: Envoy Proxy
+    url: https://github.com/envoyproxy/envoy/releases
+    type: github_release
+
+  - name: Kong Gateway
+    url: https://github.com/Kong/kong/releases
+    type: github_release
