@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] The orchestrator is callable with fake dependencies and returns the same decisions as the real run
 - [x] Source adapters accept a fetch implementation and are tested against recorded payloads
@@ -19,5 +19,5 @@ Implemented on `ticket/01-test-seams`.
 - `src/collector/github.ts` and `src/collector/website.ts` take an optional `FetchLike` (default global `fetch`); `FetchLike` lives in `src/types.ts`.
 - `src/state/store.ts` was imported by `src/cli.ts` but missing from the tree, so `typecheck` failed before this ticket. It was authored here (load/save/savePending/reset) and covered by `tests/state.test.ts`.
 - Tests: `tests/pipeline.test.ts` (orchestrator), `tests/collector.test.ts` (adapters), `tests/state.test.ts` (store). 35 tests, no network access.
-- Behavior kept identical, including two existing quirks now pinned by tests: a first run with no prior digest always publishes (bootstrap counts as due), and a partial collection failure only exits non-zero on the publish path.
+- Behavior otherwise kept identical. The first run with no prior digest publishes (bootstrap counts as due). A later review changed partial collection failure to exit non-zero on every path.
 

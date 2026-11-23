@@ -4,9 +4,9 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The pipeline loads the in-scope Source registry and collects Items from a GitHub release Source
-- [ ] Security signals screen Items and rule fallback marks qualifying Items
-- [ ] Ranking selects Items and a minimal digest renders its title, summary and items
-- [ ] Dry-run prints the digest without touching Notion or state, and a real run creates a child page
+- [x] The pipeline loads the in-scope Source registry and collects Items from a GitHub release Source
+- [x] Security signals screen Items and rule fallback marks qualifying Items
+- [x] Ranking selects Items and a minimal digest renders its title, summary and items
+- [x] Dry-run prints the digest without touching Notion or state, and a real run creates a child page

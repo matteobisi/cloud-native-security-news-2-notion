@@ -4,10 +4,10 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] GitHub release and repository Sources are collected; website Sources emit an Item only when their text changes
-- [ ] Per-Source last-seen markers suppress already-collected Items on the next run
-- [ ] Items are deduplicated by canonical URL then normalized title
-- [ ] Per-Source and per-digest caps apply, and omitted Items are counted
-- [ ] A failed Source is logged and the run continues
+- [x] GitHub release and repository Sources are collected; website Sources emit an Item only when their text changes
+- [x] Per-Source last-seen markers suppress already-collected Items on the next run
+- [x] Items are deduplicated by canonical URL then normalized title
+- [x] Per-Source and per-digest caps apply, and omitted Items are counted
+- [x] A failed Source is logged and the run continues

@@ -4,10 +4,10 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The page contains the title heading, summary callout, top stories, per-category headings, red callouts for CRITICAL Items, item toggles with bookmarks, omitted count and footer
-- [ ] Content is created in a first batch and appended in chunks of one hundred blocks
-- [ ] Rate-limit and overload responses are retried with the server delay
-- [ ] A failed publish writes the digest to a pending area and the process exits non-zero
-- [ ] A partial collection failure also yields a non-zero exit
+- [x] The page contains the title heading, summary callout, top stories, per-category headings, red callouts for CRITICAL Items, item toggles with bookmarks, omitted count and footer
+- [x] Content is created in a first batch and appended in chunks of one hundred blocks
+- [x] Rate-limit and overload responses are retried with the server delay
+- [x] A failed publish writes the digest to a pending area and the process exits non-zero
+- [x] A partial collection failure also yields a non-zero exit

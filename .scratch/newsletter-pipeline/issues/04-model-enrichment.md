@@ -4,9 +4,9 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The model client calls the configured Docker Model Runner endpoint and parses a JSON array
-- [ ] Judgements populate qualifying, severity, summary and why-it-matters
-- [ ] Malformed or unavailable model output falls back to rule-based judgements without failing the run
-- [ ] Model host and name respect configuration and environment overrides
+- [x] The model client calls the configured Docker Model Runner endpoint and parses a JSON array
+- [x] Judgements populate qualifying, severity, summary and why-it-matters
+- [x] Malformed or unavailable model output falls back to rule-based judgements without failing the run
+- [x] Model host and name respect configuration and environment overrides
