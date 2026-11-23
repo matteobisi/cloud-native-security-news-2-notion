@@ -68,6 +68,10 @@ function itemToggle(item: EnrichedItem): Block {
   };
 }
 
+function needsRedCallout(item: EnrichedItem): boolean {
+  return item.priority === "CRITICAL" || item.severity >= 5;
+}
+
 export function buildBlocks(digest: Digest): Block[] {
   const blocks: Block[] = [heading(1, digest.title)];
 
@@ -86,7 +90,7 @@ export function buildBlocks(digest: Digest): Block[] {
 
   for (const [category, items] of groupByCategory(digest.items)) {
     blocks.push(heading(2, category));
-    for (const item of items.filter((entry) => entry.priority === "CRITICAL")) {
+    for (const item of items.filter(needsRedCallout)) {
       blocks.push(callout(`${item.title}: ${item.summary}`, "🚨", "red_background"));
     }
     for (const item of items) blocks.push(itemToggle(item));

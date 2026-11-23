@@ -1,4 +1,4 @@
-import type { PipelineConfig } from "../types";
+import type { FetchLike, PipelineConfig } from "../types";
 
 function extractJson(content: string): unknown {
   const start = content.indexOf("[");
@@ -12,8 +12,9 @@ function extractJson(content: string): unknown {
 export async function callJsonModel(
   model: PipelineConfig["model"],
   prompt: string,
+  fetchImpl: FetchLike = fetch,
 ): Promise<unknown> {
-  const res = await fetch(`${model.baseUrl}/chat/completions`, {
+  const res = await fetchImpl(`${model.baseUrl}/chat/completions`, {
     signal: AbortSignal.timeout(120_000),
     method: "POST",
     headers: { "Content-Type": "application/json" },

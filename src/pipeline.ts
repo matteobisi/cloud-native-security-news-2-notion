@@ -63,7 +63,6 @@ export type PipelineStatus =
   | "publish-failed"
   | "held"
   | "skipped-empty-buffer"
-  | "skipped-no-qualifying"
   | "dry-run";
 
 export interface PipelineResult {
@@ -175,28 +174,25 @@ export async function runPipeline(
     enriched.filter((item) => item.qualifying && new Date(item.publishedAt) >= start),
   );
 
-  const forced = dueToPublish(state, config, now);
-  if (qualifying.length < config.cadence.minQualifyingItems && !forced) {
-    log(
-      `${qualifying.length} qualifying item(s) < ${config.cadence.minQualifyingItems}; holding until next run`,
-    );
-    if (!dryRun) store.save(state);
-    return { status: "held", errors, exitCode: errors.length > 0 ? 1 : 0 };
-  }
-
-  if (qualifying.length === 0) {
-    log("no qualifying items in window; nothing to publish");
-    if (!dryRun) store.save(state);
-    return { status: "skipped-no-qualifying", errors, exitCode: errors.length > 0 ? 1 : 0 };
-  }
-
   const selected = selectForDigest(qualifying, config.limits.maxItemsPerDigest);
   const digest = buildDigest(selected.items, selected.omitted, config, start, now, collected.scanned);
 
+  // A dry run always previews the digest for the window, even below the minimum.
   if (dryRun) {
     return { status: "dry-run", errors, exitCode: errors.length > 0 ? 1 : 0, digest };
   }
 
+  const forced = dueToPublish(state, config, now);
+  const shouldPublish = forced || qualifying.length >= config.cadence.minQualifyingItems;
+  if (!shouldPublish) {
+    log(
+      `${qualifying.length} qualifying item(s) < ${config.cadence.minQualifyingItems}; holding until next run`,
+    );
+    store.save(state);
+    return { status: "held", errors, exitCode: errors.length > 0 ? 1 : 0 };
+  }
+
+  // A forced digest publishes even with no qualifying items, so the archive is never silent.
   if (!token || !parentPageId) {
     throw new Error("NOTION_TOKEN and NOTION_PARENT_PAGE_ID must be set");
   }

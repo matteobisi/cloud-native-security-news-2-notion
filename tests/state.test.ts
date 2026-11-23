@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { loadState, resetState, savePending, saveState } from "../src/state/store";
+import { listPending, loadState, removePending, resetState, savePending, saveState } from "../src/state/store";
 import type { Digest, Item } from "../src/types";
 
 function tempDir(): string {
@@ -69,6 +69,36 @@ test("savePending writes the digest to a pending file", () => {
 
   assert.ok(fs.existsSync(file));
   assert.equal(JSON.parse(fs.readFileSync(file, "utf8")).title, "Digest");
+});
+
+test("listPending round-trips saved digests and removePending deletes them", () => {
+  const dir = tempDir();
+  const digest: Digest = {
+    title: "Digest",
+    date: "2026-03-31T00:00:00.000Z",
+    windowStart: "2026-03-24T00:00:00.000Z",
+    windowEnd: "2026-03-31T00:00:00.000Z",
+    items: [],
+    omitted: 0,
+    sourcesScanned: 1,
+    model: "ai/gemma3:12b-q4_K_M",
+  };
+
+  const file = savePending(dir, digest);
+  const pending = listPending(dir);
+
+  assert.equal(pending.length, 1);
+  assert.equal(pending[0].path, file);
+  assert.equal(pending[0].digest.title, "Digest");
+
+  removePending(pending[0].path);
+
+  assert.deepEqual(listPending(dir), []);
+  assert.equal(fs.existsSync(file), false);
+});
+
+test("listPending returns nothing when no digest is buffered", () => {
+  assert.deepEqual(listPending(tempDir()), []);
 });
 
 test("resetState clears the state directory", () => {

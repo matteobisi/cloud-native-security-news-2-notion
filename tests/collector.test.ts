@@ -16,14 +16,23 @@ function jsonResponse(body: unknown, status = 200): Response {
   } as unknown as Response;
 }
 
-function textResponse(body: string, status = 200): Response {
+function textResponse(
+  body: string,
+  status = 200,
+  extraHeaders: Record<string, string> = {},
+): Response {
   return {
     ok: status >= 200 && status < 300,
     status,
     json: async () => JSON.parse(body),
     text: async () => body,
-    headers: new Headers({ "content-type": "text/html" }),
+    headers: new Headers({ "content-type": "text/html", ...extraHeaders }),
   } as unknown as Response;
+}
+
+/** A page whose first 4000 stripped characters are identical for every token. */
+function paddedPage(token: string): string {
+  return `<html><head><title>Changelog</title></head><body>${"padding ".repeat(600)}${token}</body></html>`;
 }
 
 function githubSource(): SourceConfig {
@@ -157,4 +166,43 @@ test("website adapter reports non-OK responses", async () => {
   await assert.rejects(() => collectWebsite(websiteSource(), undefined, fetchImpl), {
     message: "blog responded 500",
   });
+});
+
+test("website adapter hashes the full text but stores only the truncated text", async () => {
+  const first = await collectWebsite(websiteSource(), undefined, async () =>
+    textResponse(paddedPage("v2.0.0")),
+  );
+
+  assert.equal(first.items[0].text.length, 4000);
+
+  const second = await collectWebsite(websiteSource(), first.seenId, async () =>
+    textResponse(paddedPage("v2.1.0")),
+  );
+
+  assert.equal(second.items.length, 1);
+  assert.notEqual(second.seenId, first.seenId);
+  assert.equal(second.items[0].text, first.items[0].text);
+});
+
+test("website adapter uses the Last-Modified header as publishedAt", async () => {
+  const result = await collectWebsite(websiteSource(), undefined, async () =>
+    textResponse(CHANGELOG, 200, { "Last-Modified": "Tue, 10 Mar 2026 12:00:00 GMT" }),
+  );
+
+  assert.equal(result.items[0].publishedAt, "2026-03-10T12:00:00.000Z");
+});
+
+test("website adapter falls back to now when Last-Modified is missing or unparseable", async () => {
+  const before = Date.now();
+  const missing = await collectWebsite(websiteSource(), undefined, async () =>
+    textResponse(CHANGELOG),
+  );
+  const unparseable = await collectWebsite(websiteSource(), undefined, async () =>
+    textResponse(CHANGELOG, 200, { "Last-Modified": "not-a-date" }),
+  );
+
+  for (const result of [missing, unparseable]) {
+    const stamp = new Date(result.items[0].publishedAt).getTime();
+    assert.ok(stamp >= before - 1000 && stamp <= Date.now() + 1000, result.items[0].publishedAt);
+  }
 });

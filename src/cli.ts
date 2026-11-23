@@ -4,7 +4,7 @@ import { loadConfig } from "./config";
 import { enrich } from "./enrich";
 import { runPipeline } from "./pipeline";
 import { publishDigest } from "./render/notion";
-import { loadState, resetState, savePending, saveState } from "./state/store";
+import { listPending, loadState, removePending, resetState, savePending, saveState } from "./state/store";
 import type { Digest } from "./types";
 
 interface RunOptions {
@@ -38,6 +38,8 @@ async function run(options: RunOptions): Promise<void> {
         load: () => loadState(stateDir),
         save: (state) => saveState(stateDir, state),
         savePending: (digest) => savePending(stateDir, digest),
+        listPending: () => listPending(stateDir),
+        removePending: (file) => removePending(file),
       },
       now: () => new Date(),
       config: pipeline,

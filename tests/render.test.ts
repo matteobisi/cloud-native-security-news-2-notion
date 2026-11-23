@@ -52,6 +52,30 @@ test("critical items produce a red callout", () => {
   assert.equal(red.length, 1);
 });
 
+test("a severity 5 item from a non-critical source produces a red callout", () => {
+  const blocks = buildBlocks(
+    digest([
+      item({ id: "1", priority: "HIGH", severity: 5, title: "urgent", url: "https://example.com/1" }),
+      item({ id: "2", priority: "HIGH", severity: 4, title: "routine", url: "https://example.com/2" }),
+    ]),
+  );
+  const red = blocks.filter(
+    (block) => block.type === "callout" && (block.callout as { color: string }).color === "red_background",
+  );
+  assert.equal(red.length, 1);
+  const content = (red[0].callout as { rich_text: Array<{ text: { content: string } }> })
+    .rich_text[0].text.content;
+  assert.ok(content.startsWith("urgent:"));
+});
+
+test("a critical item is called out even when its severity is low", () => {
+  const blocks = buildBlocks(digest([item({ priority: "CRITICAL", severity: 2 })]));
+  const red = blocks.filter(
+    (block) => block.type === "callout" && (block.callout as { color: string }).color === "red_background",
+  );
+  assert.equal(red.length, 1);
+});
+
 test("each item becomes a toggle with a bookmark child", () => {
   const blocks = buildBlocks(digest([item({})]));
   const toggle = blocks.find((block) => block.type === "toggle") as {

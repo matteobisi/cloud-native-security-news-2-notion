@@ -31,6 +31,18 @@ export interface WebsiteResult {
   seenId: string;
 }
 
+const TEXT_LIMIT = 4000;
+
+/** Prefer the response's Last-Modified header as the publish date when it parses. */
+function publishedAt(res: Response, now: Date): string {
+  const header = res.headers?.get("last-modified");
+  if (header) {
+    const parsed = new Date(header);
+    if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
+  }
+  return now.toISOString();
+}
+
 export async function collectWebsite(
   source: SourceConfig,
   previousSeenId: string | undefined,
@@ -45,8 +57,10 @@ export async function collectWebsite(
   }
 
   const html = await res.text();
-  const text = stripHtml(html).slice(0, 4000);
-  const seenId = crypto.createHash("sha256").update(text).digest("hex");
+  // Hash the whole page so a change past the truncation point is still detected,
+  // but keep only the truncated text on the item.
+  const fullText = stripHtml(html);
+  const seenId = crypto.createHash("sha256").update(fullText).digest("hex");
 
   if (previousSeenId === seenId) {
     return { items: [], seenId };
@@ -64,8 +78,8 @@ export async function collectWebsite(
         type: source.type,
         title: extractTitle(html) || source.name,
         url: source.url,
-        publishedAt: new Date().toISOString(),
-        text,
+        publishedAt: publishedAt(res, new Date()),
+        text: fullText.slice(0, TEXT_LIMIT),
       },
     ],
   };

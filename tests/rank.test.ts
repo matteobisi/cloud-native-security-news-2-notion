@@ -39,6 +39,50 @@ test("dedupe removes matching normalized titles", () => {
   assert.equal(kept.length, 1);
 });
 
+test("dedupe keeps the same title when it comes from different sources", () => {
+  const kept = dedupe([
+    item({
+      id: "1",
+      sourceKey: "cloud-native-k8s:alpha",
+      sourceName: "alpha",
+      title: "v1.2.0",
+      url: "https://alpha.example.com/releases/v1.2.0",
+    }),
+    item({
+      id: "2",
+      sourceKey: "security-tools:beta",
+      sourceName: "beta",
+      title: "v1.2.0",
+      url: "https://beta.example.com/releases/v1.2.0",
+    }),
+  ]);
+  assert.deepEqual(
+    kept.map((entry) => entry.id),
+    ["1", "2"],
+  );
+});
+
+test("dedupe removes matching canonical urls across different sources", () => {
+  const kept = dedupe([
+    item({
+      id: "1",
+      sourceKey: "cloud-native-k8s:alpha",
+      title: "alpha news",
+      url: "https://example.com/shared/post/",
+    }),
+    item({
+      id: "2",
+      sourceKey: "security-tools:beta",
+      title: "beta news",
+      url: "https://example.com/shared/post?utm_source=beta",
+    }),
+  ]);
+  assert.deepEqual(
+    kept.map((entry) => entry.id),
+    ["1"],
+  );
+});
+
 test("rank orders by priority then severity", () => {
   const ranked = rank([
     item({ id: "low", priority: "MEDIUM", severity: 5 }),

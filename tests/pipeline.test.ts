@@ -81,6 +81,7 @@ interface HarnessOptions {
   publishFails?: boolean;
   env?: Record<string, string>;
   now?: Date;
+  pending?: Array<{ path: string; digest: Digest }>;
 }
 
 interface Harness {
@@ -88,6 +89,7 @@ interface Harness {
   published: Array<{ digest: Digest; parentPageId: string; token: string }>;
   saved: State[];
   pending: Digest[];
+  removedPending: string[];
   enrichedInputs: Item[][];
   logs: string[];
   warnings: string[];
@@ -98,6 +100,8 @@ function harness(options: HarnessOptions = {}): Harness {
   const published: Harness["published"] = [];
   const saved: State[] = [];
   const pending: Digest[] = [];
+  const pendingQueue = (options.pending ?? []).map((entry) => ({ ...entry }));
+  const removedPending: string[] = [];
   const enrichedInputs: Item[][] = [];
   const logs: string[] = [];
   const warnings: string[] = [];
@@ -110,6 +114,7 @@ function harness(options: HarnessOptions = {}): Harness {
     published,
     saved,
     pending,
+    removedPending,
     enrichedInputs,
     logs,
     warnings,
@@ -137,6 +142,12 @@ function harness(options: HarnessOptions = {}): Harness {
           pending.push(digest);
           return "state/pending/digest.json";
         },
+        listPending: () => pendingQueue.slice(),
+        removePending: (file) => {
+          removedPending.push(file);
+          const index = pendingQueue.findIndex((entry) => entry.path === file);
+          if (index >= 0) pendingQueue.splice(index, 1);
+        },
       },
       now: () => options.now ?? NOW,
       config: pipelineConfig(),
@@ -145,6 +156,19 @@ function harness(options: HarnessOptions = {}): Harness {
       log: (line) => logs.push(line),
       warn: (line) => warnings.push(line),
     },
+  };
+}
+
+function pendingDigest(): Digest {
+  return {
+    title: "Cloud Native Security Digest — 2026-03-24",
+    date: "2026-03-24T00:00:00.000Z",
+    windowStart: "2026-03-17T00:00:00.000Z",
+    windowEnd: "2026-03-24T00:00:00.000Z",
+    items: [],
+    omitted: 0,
+    sourcesScanned: 1,
+    model: "ai/gemma3:12b-q4_K_M",
   };
 }
 
@@ -329,6 +353,103 @@ test("a dry run writes no state and publishes nothing", async () => {
   assert.equal(h.published.length, 0);
   assert.equal(h.saved.length, 0);
   assert.equal(h.pending.length, 0);
+});
+
+test("a dry run previews a digest below the minimum without touching state or Notion", async () => {
+  const h = harness({
+    collected: [item({ id: "one" })],
+    enriched: [enriched({ id: "one", title: "one" })],
+    state: { lastPublishedAt: "2026-03-25T00:00:00.000Z" },
+  });
+
+  const result = await runPipeline(h.deps, { dryRun: true });
+
+  assert.equal(result.status, "dry-run");
+  assert.deepEqual(result.digest?.items.map((entry) => entry.id), ["one"]);
+  assert.equal(result.digest?.windowStart, "2026-03-25T00:00:00.000Z");
+  assert.equal(h.published.length, 0);
+  assert.equal(h.saved.length, 0);
+  assert.equal(h.pending.length, 0);
+});
+
+test("a dry run previews an empty digest when nothing qualifies", async () => {
+  const h = harness({
+    collected: [item({ id: "skip", title: "docs tweak" })],
+    enriched: [
+      enriched({ id: "skip", title: "docs tweak", qualifying: false }),
+    ],
+    state: { lastPublishedAt: "2026-03-25T00:00:00.000Z" },
+  });
+
+  const result = await runPipeline(h.deps, { dryRun: true });
+
+  assert.equal(result.status, "dry-run");
+  assert.deepEqual(result.digest?.items, []);
+  assert.equal(h.saved.length, 0);
+  assert.equal(h.published.length, 0);
+});
+
+test("a forced digest publishes even with no qualifying items", async () => {
+  const h = harness({
+    collected: [item({ id: "skip", title: "docs tweak" })],
+    enriched: [enriched({ id: "skip", title: "docs tweak", qualifying: false })],
+    state: { lastPublishedAt: "2026-02-01T00:00:00.000Z" },
+  });
+
+  const result = await runPipeline(h.deps);
+
+  assert.equal(result.status, "published");
+  assert.equal(h.published.length, 1);
+  assert.deepEqual(h.published[0].digest.items, []);
+  assert.equal(h.saved.at(-1)?.lastPublishedAt, NOW.toISOString());
+});
+
+test("the first run publishes an empty digest rather than staying silent", async () => {
+  const h = harness({
+    collected: [item({ id: "skip", title: "docs tweak" })],
+    enriched: [enriched({ id: "skip", title: "docs tweak", qualifying: false })],
+  });
+
+  const result = await runPipeline(h.deps);
+
+  assert.equal(result.status, "published");
+  assert.deepEqual(h.published[0].digest.items, []);
+});
+
+test("retries a buffered pending digest before collecting", async () => {
+  const digest = pendingDigest();
+  const h = harness({ pending: [{ path: "state/pending/1.json", digest }] });
+
+  const result = await runPipeline(h.deps);
+
+  assert.deepEqual(h.removedPending, ["state/pending/1.json"]);
+  assert.equal(h.published[0].digest.title, digest.title);
+  assert.equal(h.published[0].parentPageId, "parent-1");
+  assert.equal(h.published[0].token, "secret");
+  assert.equal(h.saved.at(-1)?.lastPublishedAt, digest.windowEnd);
+  assert.ok(h.logs.some((line) => line.includes("retried pending digest")));
+  assert.equal(result.status, "skipped-empty-buffer");
+});
+
+test("keeps a pending digest when the retry still fails", async () => {
+  const h = harness({
+    pending: [{ path: "state/pending/1.json", digest: pendingDigest() }],
+    publishFails: true,
+  });
+
+  await runPipeline(h.deps);
+
+  assert.deepEqual(h.removedPending, []);
+  assert.deepEqual(h.warnings, ["pending digest still failing: notion is down"]);
+});
+
+test("a dry run does not retry pending digests", async () => {
+  const h = harness({ pending: [{ path: "state/pending/1.json", digest: pendingDigest() }] });
+
+  await runPipeline(h.deps, { dryRun: true });
+
+  assert.deepEqual(h.removedPending, []);
+  assert.equal(h.published.length, 0);
 });
 
 test("buffers the digest and exits non-zero when publishing fails", async () => {

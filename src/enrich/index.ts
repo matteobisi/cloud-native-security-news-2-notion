@@ -1,4 +1,4 @@
-import type { EnrichedItem, Item, PipelineConfig } from "../types";
+import type { EnrichedItem, FetchLike, Item, PipelineConfig, Priority } from "../types";
 import { screenItems } from "./keywords";
 import { callJsonModel } from "./model";
 
@@ -9,6 +9,18 @@ interface Judgement {
   summary?: string;
   whyItMatters?: string;
 }
+
+/** Injected seams so enrichment can be exercised offline. */
+export interface EnrichOptions {
+  warn?(line: string): void;
+  fetchImpl?: FetchLike;
+}
+
+const FALLBACK_SEVERITY: Record<Priority, number> = {
+  CRITICAL: 5,
+  HIGH: 4,
+  MEDIUM: 3,
+};
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -38,14 +50,12 @@ function buildPrompt(candidates: Item[]): string {
   ].join("\n");
 }
 
-function fallback(item: Item, signals: string[]): EnrichedItem {
-  const hits = signals.filter((signal) =>
-    `${item.title} ${item.text}`.toLowerCase().includes(signal.toLowerCase()),
-  );
+/** Rule-based judgement, using the security signals the screen already matched. */
+function fallback(item: Item, hits: string[]): EnrichedItem {
   return {
     ...item,
     qualifying: hits.length > 0,
-    severity: item.priority === "CRITICAL" ? 4 : 3,
+    severity: FALLBACK_SEVERITY[item.priority] ?? 3,
     summary: item.title,
     whyItMatters: hits.length > 0 ? `Matched security signals: ${hits.join(", ")}` : "",
   };
@@ -54,8 +64,11 @@ function fallback(item: Item, signals: string[]): EnrichedItem {
 export async function enrich(
   items: Item[],
   pipeline: PipelineConfig,
+  options: EnrichOptions = {},
 ): Promise<EnrichedItem[]> {
-  const { candidates } = screenItems(items, pipeline.securitySignals);
+  const warn = options.warn ?? ((line: string) => console.warn(line));
+  const fetchImpl = options.fetchImpl;
+  const { candidates, matches } = screenItems(items, pipeline.securitySignals);
   if (candidates.length === 0) return [];
 
   let judgements: Judgement[] = [];
@@ -65,10 +78,11 @@ export async function enrich(
       const raw = await callJsonModel(
         pipeline.model,
         buildPrompt(candidates.slice(index, index + batchSize)),
+        fetchImpl,
       );
       if (Array.isArray(raw)) judgements.push(...(raw as Judgement[]));
     } catch (error) {
-      console.warn(`enrichment batch fell back to rules: ${(error as Error).message}`);
+      warn(`enrichment batch fell back to rules: ${(error as Error).message}`);
     }
   }
 
@@ -76,7 +90,7 @@ export async function enrich(
 
   return candidates.map((item) => {
     const judgement = byId.get(item.id);
-    if (!judgement) return fallback(item, pipeline.securitySignals);
+    if (!judgement) return fallback(item, matches.get(item.id) ?? []);
     return {
       ...item,
       qualifying: Boolean(judgement.qualifying),

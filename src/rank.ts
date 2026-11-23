@@ -19,6 +19,14 @@ function titleKey(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
+/**
+ * Canonical urls dedupe globally, but normalized titles only dedupe within one
+ * Source: unrelated projects routinely ship the same tag ("v1.2.0").
+ */
+function titleKeyForSource(item: EnrichedItem): string {
+  return `${item.sourceKey}\u0000${titleKey(item.title)}`;
+}
+
 export function dedupe(items: EnrichedItem[]): EnrichedItem[] {
   const urls = new Set<string>();
   const titles = new Set<string>();
@@ -26,7 +34,7 @@ export function dedupe(items: EnrichedItem[]): EnrichedItem[] {
 
   for (const item of items) {
     const url = canonicalUrl(item.url);
-    const title = titleKey(item.title);
+    const title = titleKeyForSource(item);
     if (urls.has(url) || titles.has(title)) continue;
     urls.add(url);
     titles.add(title);
