@@ -1,4 +1,4 @@
-import type { Item, SourceConfig } from "../types";
+import type { FetchLike, Item, SourceConfig } from "../types";
 
 const GITHUB_API = "https://api.github.com";
 
@@ -22,6 +22,7 @@ export async function collectGitHub(
   source: SourceConfig,
   since: Date,
   perSource: number,
+  fetchImpl: FetchLike = fetch,
 ): Promise<Item[]> {
   const repo = repoFromUrl(source.url);
   if (!repo) return [];
@@ -34,7 +35,7 @@ export async function collectGitHub(
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   }
 
-  const res = await fetch(
+  const res = await fetchImpl(
     `${GITHUB_API}/repos/${repo.owner}/${repo.repo}/releases?per_page=${perSource}`,
     { headers },
   );

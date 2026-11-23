@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { Item, SourceConfig } from "../types";
+import type { FetchLike, Item, SourceConfig } from "../types";
 
 function extractTitle(html: string): string | null {
   const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
@@ -34,8 +34,9 @@ export interface WebsiteResult {
 export async function collectWebsite(
   source: SourceConfig,
   previousSeenId: string | undefined,
+  fetchImpl: FetchLike = fetch,
 ): Promise<WebsiteResult> {
-  const res = await fetch(source.url, {
+  const res = await fetchImpl(source.url, {
     headers: { "User-Agent": "cloud-native-security-news-digest" },
   });
   if (!res.ok) {
