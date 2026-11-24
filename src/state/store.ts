@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Digest, Item } from "../types";
+import type { Digest, Item, RunStatus } from "../types";
 
 export interface SourceState {
   lastSeenId?: string;
@@ -17,6 +17,14 @@ export interface State {
 export interface PendingDigest {
   path: string;
   digest: Digest;
+}
+
+export interface RunMarker {
+  runId: string;
+  startedAt: string;
+  finishedAt: string;
+  status: RunStatus;
+  exitCode: number;
 }
 
 function emptyState(): State {
@@ -54,7 +62,46 @@ export function saveState(dir: string, state: State): void {
 }
 
 export function resetState(dir: string): void {
-  fs.rmSync(dir, { recursive: true, force: true });
+  if (!fs.existsSync(dir)) return;
+  // Clear the contents rather than the directory: it may be a bind mount.
+  for (const entry of fs.readdirSync(dir)) {
+    fs.rmSync(path.join(dir, entry), { recursive: true, force: true });
+  }
+}
+
+function markerFile(dir: string): string {
+  return path.join(dir, "last-run.json");
+}
+
+function isRunMarker(value: unknown): value is RunMarker {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as RunMarker;
+  return (
+    typeof candidate.runId === "string" &&
+    typeof candidate.startedAt === "string" &&
+    typeof candidate.finishedAt === "string" &&
+    typeof candidate.status === "string" &&
+    typeof candidate.exitCode === "number"
+  );
+}
+
+export function readRunMarker(dir: string): RunMarker | null {
+  const file = markerFile(dir);
+  if (!fs.existsSync(file)) return null;
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+    return isRunMarker(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+export function writeRunMarker(dir: string, marker: RunMarker): void {
+  fs.mkdirSync(dir, { recursive: true });
+  const file = markerFile(dir);
+  const temp = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(temp, JSON.stringify(marker, null, 2));
+  fs.renameSync(temp, file);
 }
 
 function pendingDir(dir: string): string {

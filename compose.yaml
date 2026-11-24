@@ -6,6 +6,7 @@ services:
         required: false
     environment:
       MODEL_BASE_URL: http://model-runner.docker.internal/engines/v1
+      NEWSLETTER_RUN_ID: ${NEWSLETTER_RUN_ID:-}
     volumes:
       - ./config:/app/config:ro
       - ./state:/app/state
@@ -16,5 +17,5 @@ services:
 
 models:
   llm:
-    model: ai/gemma3:12b-q4_K_M
+    model: huggingface.co/bartowski/qwen2.5-14b-instruct-gguf:latest
     context_size: 8192

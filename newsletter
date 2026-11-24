@@ -4,12 +4,39 @@ set -euo pipefail
 REPO_DIR="${0:A:h}"
 cd "$REPO_DIR"
 
+run_via_agent() {
+  local run_id marker_run_id code agent_status=0
+  run_id="$(uuidgen | tr '[:upper:]' '[:lower:]')"
+  export NEWSLETTER_RUN_ID="$run_id"
+
+  if docker agent run --exec --safety autonomous agents/digest.yaml "Run the pipeline."; then
+    agent_status=0
+  else
+    agent_status=$?
+  fi
+
+  marker_run_id="$(sed -n 's/.*"runId": *"\([^"]*\)".*/\1/p' state/last-run.json 2>/dev/null | head -1 || true)"
+  if [[ "$marker_run_id" != "$run_id" ]]; then
+    echo "error: no run marker for this attempt; the pipeline did not execute." >&2
+    echo "       Inspect the agent transcript, then retry or use ./newsletter debug-run." >&2
+    exit 1
+  fi
+
+  code="$(sed -n 's/.*"exitCode": *\([0-9][0-9]*\).*/\1/p' state/last-run.json 2>/dev/null | head -1 || true)"
+  if [[ -n "$code" && "$code" -ne 0 ]]; then
+    exit "$code"
+  fi
+
+  exit "$agent_status"
+}
+
 case "${1:-run}" in
-  run)     docker agent run --exec --safety restricted agents/digest.yaml ;;
-  dry-run) docker compose run --rm digest node dist/cli.js run --dry-run ;;
-  reset)   docker compose run --rm digest node dist/cli.js reset ;;
-  schedule) docker compose run --rm digest node dist/cli.js schedule ;;
+  run)     run_via_agent ;;
+  debug-run) docker compose run --rm --build digest node dist/cli.js run ;;
+  dry-run) docker compose run --rm --build digest node dist/cli.js run --dry-run ;;
+  reset)   docker compose run --rm --build digest node dist/cli.js reset ;;
+  schedule) docker compose run --rm --build digest node dist/cli.js schedule ;;
   up)      docker compose up --build ;;
   build)   docker compose build ;;
-  *)       echo "usage: ./newsletter <run|dry-run|reset|schedule|up|build>" ;;
+  *)       echo "usage: ./newsletter <run|debug-run|dry-run|reset|schedule|up|build>" ;;
 esac

@@ -1,11 +1,20 @@
+import crypto from "node:crypto";
 import path from "node:path";
 import { collectAll } from "./collector";
 import { loadConfig } from "./config";
 import { enrich } from "./enrich";
 import { runPipeline } from "./pipeline";
 import { publishDigest } from "./render/notion";
-import { listPending, loadState, removePending, resetState, savePending, saveState } from "./state/store";
-import type { Digest } from "./types";
+import {
+  listPending,
+  loadState,
+  removePending,
+  resetState,
+  savePending,
+  saveState,
+  writeRunMarker,
+} from "./state/store";
+import type { Digest, RunStatus } from "./types";
 
 interface RunOptions {
   dryRun: boolean;
@@ -28,32 +37,54 @@ function printDryRun(digest: Digest): void {
 async function run(options: RunOptions): Promise<void> {
   const { root, pipeline, sources } = loadConfig();
   const stateDir = path.join(root, pipeline.paths.stateDir);
+  const runId = process.env.NEWSLETTER_RUN_ID?.trim() || crypto.randomUUID();
+  const startedAt = new Date().toISOString();
+  let status: RunStatus = "error";
+  let exitCode = 1;
 
-  const result = await runPipeline(
-    {
-      collect: collectAll,
-      enrich,
-      publish: publishDigest,
-      store: {
-        load: () => loadState(stateDir),
-        save: (state) => saveState(stateDir, state),
-        savePending: (digest) => savePending(stateDir, digest),
-        listPending: () => listPending(stateDir),
-        removePending: (file) => removePending(file),
+  try {
+    const result = await runPipeline(
+      {
+        collect: collectAll,
+        enrich,
+        publish: publishDigest,
+        store: {
+          load: () => loadState(stateDir),
+          save: (state) => saveState(stateDir, state),
+          savePending: (digest) => savePending(stateDir, digest),
+          listPending: () => listPending(stateDir),
+          removePending: (file) => removePending(file),
+        },
+        now: () => new Date(),
+        config: pipeline,
+        sources,
+        env: { get: (key) => process.env[key] },
+        log: (line) => console.log(line),
+        warn: (line) => console.warn(line),
       },
-      now: () => new Date(),
-      config: pipeline,
-      sources,
-      env: { get: (key) => process.env[key] },
-      log: (line) => console.log(line),
-      warn: (line) => console.warn(line),
-    },
-    options,
-  );
+      options,
+    );
 
-  if (result.status === "dry-run" && result.digest) printDryRun(result.digest);
-  if (result.message) console.error(result.message);
-  process.exitCode = result.exitCode;
+    status = result.status;
+    exitCode = result.exitCode;
+    if (result.status === "dry-run" && result.digest) printDryRun(result.digest);
+    if (result.message) console.error(result.message);
+    process.exitCode = result.exitCode;
+  } finally {
+    if (!options.dryRun) {
+      try {
+        writeRunMarker(stateDir, {
+          runId,
+          startedAt,
+          finishedAt: new Date().toISOString(),
+          status,
+          exitCode,
+        });
+      } catch (error) {
+        console.error(`failed to write run marker: ${(error as Error).message}`);
+      }
+    }
+  }
 }
 
 function printSchedule(): void {
@@ -68,7 +99,7 @@ function printSchedule(): void {
       "   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.local.security-digest.plist",
       "",
       "scripts/run.sh starts Docker Desktop, waits for `docker info`,",
-      "then runs `docker agent run --exec agents/digest.yaml`.",
+      "then runs `./newsletter run` (the Docker Agent entrypoint).",
     ].join("\n"),
   );
 }

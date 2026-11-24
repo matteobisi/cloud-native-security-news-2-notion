@@ -50,7 +50,7 @@ sources:
     type: github_release
 
   - name: Kubewarden
-    url: https://github.com/kubewarden/kubewarden/releases
+    url: https://github.com/kubewarden/policy-server/releases
     type: github_release
     priority: HIGH
 

@@ -8,6 +8,15 @@ export type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
 
 export type SourceType = "github_release" | "rss" | "json_feed" | "website";
 
+export type PipelineStatus =
+  | "published"
+  | "publish-failed"
+  | "held"
+  | "skipped-empty-buffer"
+  | "dry-run";
+
+export type RunStatus = PipelineStatus | "error";
+
 export interface SourceConfig {
   key: string;
   name: string;

@@ -6,6 +6,7 @@ import type {
   EnrichedItem,
   Item,
   PipelineConfig,
+  PipelineStatus,
   SourceConfig,
 } from "./types";
 
@@ -61,13 +62,6 @@ export interface PipelineDeps {
 export interface PipelineOptions {
   dryRun?: boolean;
 }
-
-export type PipelineStatus =
-  | "published"
-  | "publish-failed"
-  | "held"
-  | "skipped-empty-buffer"
-  | "dry-run";
 
 export interface PipelineResult {
   status: PipelineStatus;

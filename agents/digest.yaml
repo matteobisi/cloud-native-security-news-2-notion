@@ -3,7 +3,7 @@ version: "16"
 models:
   local:
     provider: dmr
-    model: ai/gemma3:12b-q4_K_M
+    model: huggingface.co/bartowski/qwen2.5-14b-instruct-gguf:latest
     max_tokens: 4096
     provider_opts:
       context_size: 8192
@@ -14,12 +14,13 @@ agents:
     description: Run the cloud-native security newsletter pipeline
     instruction: |
       You run the cloud-native security newsletter pipeline.
-      Execute exactly this command and nothing else:
+      Call the shell tool exactly once, with this command and nothing else:
 
-        node dist/cli.js run
+        docker compose run --rm --build digest node dist/cli.js run
 
+      Set the tool call's timeout to 900 seconds; the pipeline runs for minutes.
       If it exits non-zero, report the error and stop. Never invent results.
-      Finish with a one-line summary of what was published.
+      Finish with a one-line summary of what it printed.
     toolsets:
       - type: shell
       - type: think

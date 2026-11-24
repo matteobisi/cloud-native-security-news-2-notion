@@ -3,7 +3,17 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { listPending, loadState, removePending, resetState, savePending, saveState } from "../src/state/store";
+import {
+  listPending,
+  loadState,
+  readRunMarker,
+  removePending,
+  resetState,
+  savePending,
+  saveState,
+  writeRunMarker,
+} from "../src/state/store";
+import type { RunMarker } from "../src/state/store";
 import type { Digest, Item } from "../src/types";
 
 function tempDir(): string {
@@ -101,11 +111,77 @@ test("listPending returns nothing when no digest is buffered", () => {
   assert.deepEqual(listPending(tempDir()), []);
 });
 
-test("resetState clears the state directory", () => {
+function marker(runId: string, overrides: Partial<RunMarker> = {}): RunMarker {
+  return {
+    runId,
+    startedAt: "2026-03-31T00:00:00.000Z",
+    finishedAt: "2026-03-31T00:01:00.000Z",
+    status: "published",
+    exitCode: 0,
+    ...overrides,
+  };
+}
+
+test("writeRunMarker and readRunMarker round-trip a run", () => {
+  const dir = tempDir();
+  writeRunMarker(dir, marker("run-1"));
+
+  const loaded = readRunMarker(dir);
+
+  assert.deepEqual(loaded, marker("run-1"));
+});
+
+test("writeRunMarker replaces the previous run", () => {
+  const dir = tempDir();
+  writeRunMarker(dir, marker("run-1"));
+  writeRunMarker(dir, marker("run-2"));
+
+  assert.equal(readRunMarker(dir)?.runId, "run-2");
+});
+
+test("readRunMarker treats a missing or corrupt marker as absent", () => {
+  const dir = tempDir();
+  assert.equal(readRunMarker(dir), null);
+
+  fs.writeFileSync(path.join(dir, "last-run.json"), "{not json");
+  assert.equal(readRunMarker(dir), null);
+
+  fs.writeFileSync(path.join(dir, "last-run.json"), JSON.stringify({ runId: 1 }));
+  assert.equal(readRunMarker(dir), null);
+});
+
+test("writeRunMarker records a failed run", () => {
+  const dir = tempDir();
+  writeRunMarker(dir, marker("run-1", { status: "error", exitCode: 1 }));
+
+  const loaded = readRunMarker(dir);
+
+  assert.equal(loaded?.status, "error");
+  assert.equal(loaded?.exitCode, 1);
+});
+
+test("writeRunMarker creates the state directory when missing", () => {
+  const dir = path.join(tempDir(), "nested", "state");
+  writeRunMarker(dir, marker("run-1"));
+
+  assert.equal(readRunMarker(dir)?.runId, "run-1");
+});
+
+test("resetState clears the run marker", () => {
+  const dir = tempDir();
+  writeRunMarker(dir, marker("run-1"));
+
+  resetState(dir);
+
+  assert.equal(readRunMarker(dir), null);
+});
+
+test("resetState clears the state directory contents", () => {
   const dir = tempDir();
   saveState(dir, { sources: {}, buffer: [item()] });
 
   resetState(dir);
 
-  assert.equal(fs.existsSync(dir), false);
+  assert.deepEqual(fs.readdirSync(dir), []);
+  assert.deepEqual(loadState(dir), { sources: {}, buffer: [] });
 });

@@ -15,7 +15,7 @@ limits:
 
 model:
   baseUrl: http://localhost:12434/engines/v1
-  name: ai/gemma3:12b-q4_K_M
+  name: huggingface.co/bartowski/qwen2.5-14b-instruct-gguf:latest
   temperature: 0.2
   maxTokens: 4096
 
