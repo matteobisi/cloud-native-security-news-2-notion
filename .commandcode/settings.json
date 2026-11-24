@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(for u in \"https://api.github.com/repos/kubernetes/enhancements/releases\" \"https://api.github.com/repos/cncf/tag-security/releases\" \"https://about.gitlab.com/atom.xml\" \"https://www.jenkins.io/changelog-stable/rss.xml\" \"https://github.blog/changelog/label/actions/feed/\" \"https://kubernetes.io/docs/reference/issues-security/official-cve-feed/\" \"https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json\" \"https://osv.dev/list\"; do code=$(curl -s -o /dev/null -w \"%{http_code}\" -L --max-time 15 \"$u\"); echo \"$code $u\"; done)",
+      "Shell(curl -s -L --max-time 20 https://kubernetes.io/docs/reference/issues-security/official-cve-feed/index.json)",
+      "Shell(python3 -c import json,sys; d=json.load(sys.stdin); print(d.get('version')); print(sorted(d['items'][0].keys())); print(d['items'][0].get('date_published'), d['items'][0].get('title'), d['items'][0].get('url')))",
+      "Shell(npx tsx --test tests/config.test.ts 2 >& 1)",
+      "Shell(npm:*)",
+      "Shell(ls -la .github/workflows 2>/dev/null; echo '--- hooksPath'; git config core.hooksPath; echo '--- husky'; ls -d .husky 2>/dev/null; echo '--- lint configs'; ls eslint.config.* .eslintrc* biome.json .prettierrc* 2>/dev/null; echo '--- ci files'; find . -maxdepth 3 -name '*.yml' -path '*workflows*' -o -maxdepth 2 -name '.gitlab-ci.yml' 2>/dev/null | head)",
+      "Shell(ls:*)",
+      "Shell(stat:*)",
+      "Shell([:*)",
+      "Shell(sed:*)",
+      "Shell(echo:*)",
+      "Shell(timeout 240 node dist/cli.js run --dry-run 2 >& 1)",
+      "Shell(timeout 560 node dist/cli.js run --dry-run 2 >& 1)",
+      "Shell(node -e  const { collectRss } = require(\"./dist/collector/rss\"); const since = new Date(\"2026-11-20T00:00:00Z\"); const feeds = [ { key: \"ci-cd-gitops:GitHub Actions\", name: \"GitHub Actions\", url: \"https://github.blog/changelog/label/actions/feed/\", type: \"rss\", category: \"ci-cd-gitops\", priority: \"HIGH\" }, { key: \"ci-cd-gitops:GitLab CI\", name: \"GitLab CI\", url: \"https://about.gitlab.com/atom.xml\", type: \"rss\", category: \"ci-cd-gitops\", priority: \"HIGH\" }, ]; (async () => { for (const feed of feeds) { try { const r = await collectRss(feed, since, 2); console.log(\"==\", feed.name, r.items.length, \"etag:\", !!r.etag); for (const i of r.items) console.log(\" \", i.publishedAt, \"|\", i.title, \"|\", i.url); } catch (e) { console.log(\"==\", feed.name, \"ERROR\", e.message); } } })(); )",
+      "Shell(node -e  const s = require(\"./state/state.json\"); console.log(\"lastPublishedAt:\", s.lastPublishedAt); console.log(\"buffer:\", s.buffer.length); for (const i of s.buffer) console.log(\" \", i.publishedAt, i.type, i.sourceKey, \"|\", i.title.slice(0,60)); )",
+      "Shell(./newsletter:*)",
+      "Shell(cd /Users/matteo.bisi/GitRepo/Personal/cloud-native-security-news-2-notion && timeout 90 docker agent run --exec --safety restricted /private/tmp/commandcode-501/-Users-matteo-bisi-GitRepo-Personal-cloud-native-security-news-2-notion/9208d5c2-ddc4-4afd-b7c1-6525b60e70b3/scratchpad/probe-agent.yaml \"Execute node -e \\\"console.log('NODE_PROBE')\\\" using the shell tool.\" < /dev/null 2>&1 | tail -20; echo \"exit=${PIPESTATUS[0]}\")",
+      "Shell(cd /Users/matteo.bisi/GitRepo/Personal/cloud-native-security-news-2-notion && timeout 90 docker agent run --exec --safety restricted /private/tmp/commandcode-501/-Users-matteo-bisi-GitRepo-Personal-cloud-native-security-news-2-notion/9208d5c2-ddc4-4afd-b7c1-6525b60e70b3/scratchpad/probe-node.yaml \"Run the probe.\" < /dev/null 2>&1 | tail -20; echo \"exit=${PIPESTATUS[0]}\")",
+      "Shell(docker:*)",
+      "Shell(cd /Users/matteo.bisi/GitRepo/Personal/cloud-native-security-news-2-notion && timeout 120 docker agent run --exec --safety restricted /private/tmp/commandcode-501/-Users-matteo-bisi-GitRepo-Personal-cloud-native-security-news-2-notion/9208d5c2-ddc4-4afd-b7c1-6525b60e70b3/scratchpad/probe-qwen.yaml \"Run the probe.\" < /dev/null 2>&1 | tail -25; echo \"exit=${PIPESTATUS[0]}\")",
+      "Shell(cd /Users/matteo.bisi/GitRepo/Personal/cloud-native-security-news-2-notion && for s in autonomous balanced; do echo \"=== gemma safety=$s\"; timeout 90 docker agent run --exec --safety $s /private/tmp/commandcode-501/-Users-matteo-bisi-GitRepo-Personal-cloud-native-security-news-2-notion/9208d5c2-ddc4-4afd-b7c1-6525b60e70b3/scratchpad/probe-node.yaml \"Run the probe.\" < /dev/null 2>&1 | tail -8; echo \"exit=${PIPESTATUS[0]}\"; done)",
+      "Shell(docker model ps 2>&1 | head -10; echo '--- retry gemma autonomous'; cd /Users/matteo.bisi/GitRepo/Personal/cloud-native-security-news-2-notion && timeout 120 docker agent run --exec --safety autonomous /private/tmp/commandcode-501/-Users-matteo-bisi-GitRepo-Personal-cloud-native-security-news-2-notion/9208d5c2-ddc4-4afd-b7c1-6525b60e70b3/scratchpad/probe-node.yaml \"Run the probe.\" < /dev/null 2>&1 | tail -10; echo \"exit=${PIPESTATUS[0]}\")",
+      "Shell(curl -s --max-time 30 -o /tmp/modelprobe2.json -w %{http_code} %{time_total}s\\n http://localhost:12434/engines/v1/chat/completions -H Content-Type: application/json -d {\"model\":\"ai/gemma3:12b-q4_K_M\",\"max_tokens\":32,\"messages\":[{\"role\":\"user\",\"content\":\"Say OK\"}]})",
+      "Shell(sleep:*)",
+      "Shell(curl -s --max-time 60 -o /tmp/modelprobe3.json -w %{http_code} %{time_total}s\\n http://localhost:12434/engines/v1/chat/completions -H Content-Type: application/json -d {\"model\":\"ai/gemma3:12b-q4_K_M\",\"max_tokens\":32,\"messages\":[{\"role\":\"user\",\"content\":\"Say OK\"}]})",
+      "Shell(npx tsx --test tests/state.test.ts 2 >& 1)",
+      "Shell(cd /Users/matteo.bisi/GitRepo/Personal/cloud-native-security-news-2-notion && docker compose config >/dev/null 2>&1; echo \"compose config exit=$?\"; docker model ps 2>&1 | head -4)",
+      "Shell(cd /Users/matteo.bisi/GitRepo/Personal/cloud-native-security-news-2-notion && timeout 540 ./newsletter run 2>&1 | tail -35; echo \"exit=${PIPESTATUS[0]}\"; echo '--- marker'; cat state/last-run.json 2>/dev/null; echo)",
+      "Shell(python3 -c import json,sys; d=json.load(sys.stdin); print(json.dumps(d, indent=1)[:4000]))",
+      "Shell(python3 -c import json,sys; d=json.load(sys.stdin); [print(json.dumps(x, indent=1)) for x in d if x['type'] in ('shell','background_jobs','script','think')])",
+      "Shell(cd /Users/matteo.bisi/GitRepo/Personal/cloud-native-security-news-2-notion && timeout 580 ./newsletter run 2>&1 | tail -30; echo \"exit=${PIPESTATUS[0]}\"; echo '--- marker'; cat state/last-run.json 2>/dev/null; echo)",
+      "Shell(cd /Users/matteo.bisi/GitRepo/Personal/cloud-native-security-news-2-notion && git status --short; echo '--- settings.json'; cat .commandcode/settings.json 2>/dev/null; echo '--- taste diff'; git diff --stat .commandcode/taste/taste.md; echo '--- upstream'; git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>&1; git log --oneline origin/main..HEAD)",
+      "Shell(cd:*)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
