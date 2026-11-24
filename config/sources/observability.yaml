@@ -1,6 +1,7 @@
 category: observability
 description: "Prometheus, Grafana, Loki, security monitoring, audit logging, metrics"
 priority: MEDIUM
+enabled: false
 
 sources:
   # Metrics & Monitoring

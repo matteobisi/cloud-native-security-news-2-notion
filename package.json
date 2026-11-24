@@ -13,6 +13,7 @@
     "test": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
+    "fast-xml-parser": "^5.12.1",
     "yaml": "^2.6.1"
   },
   "devDependencies": {

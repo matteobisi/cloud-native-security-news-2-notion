@@ -6,7 +6,7 @@ export type Priority = "CRITICAL" | "HIGH" | "MEDIUM";
  */
 export type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;
 
-export type SourceType = "github_release" | "github_repo" | "website" | "mailing_list";
+export type SourceType = "github_release" | "rss" | "json_feed" | "website";
 
 export interface SourceConfig {
   key: string;
@@ -15,11 +15,11 @@ export interface SourceConfig {
   type: SourceType;
   category: string;
   priority: Priority;
+  includePrereleases?: boolean;
   notes?: string;
 }
 
 export interface PipelineConfig {
-  categories: string[];
   cadence: {
     minQualifyingItems: number;
     forcePublishAfterDays: number;

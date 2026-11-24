@@ -1,37 +1,11 @@
 import crypto from "node:crypto";
+import { extractTitle, stripHtml, TEXT_LIMIT } from "./html";
 import type { FetchLike, Item, SourceConfig } from "../types";
-
-function extractTitle(html: string): string | null {
-  const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  return match ? decode(match[1]).trim() : null;
-}
-
-function stripHtml(html: string): string {
-  return decode(
-    html
-      .replace(/<script[\s\S]*?<\/script>/gi, " ")
-      .replace(/<style[\s\S]*?<\/style>/gi, " ")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " "),
-  ).trim();
-}
-
-function decode(text: string): string {
-  return text
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-}
 
 export interface WebsiteResult {
   items: Item[];
   seenId: string;
 }
-
-const TEXT_LIMIT = 4000;
 
 /** Prefer the response's Last-Modified header as the publish date when it parses. */
 function publishedAt(res: Response, now: Date): string {

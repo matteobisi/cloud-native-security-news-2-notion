@@ -1,6 +1,7 @@
 category: infrastructure-databases
 description: "Linux kernel, database security (PostgreSQL, MySQL, Redis), infrastructure hardening"
 priority: MEDIUM
+enabled: false
 
 sources:
   # Linux & Kernel

@@ -5,7 +5,6 @@ import type { FetchLike, Item, PipelineConfig } from "../src/types";
 
 function config(): PipelineConfig {
   return {
-    categories: ["cloud-native-k8s"],
     cadence: {
       minQualifyingItems: 3,
       forcePublishAfterDays: 30,

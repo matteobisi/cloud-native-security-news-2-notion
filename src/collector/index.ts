@@ -1,6 +1,9 @@
 import type { Item, PipelineConfig, SourceConfig } from "../types";
-import type { State } from "../state/store";
+import type { SourceState, State } from "../state/store";
 import { collectGitHub } from "./github";
+import { collectJsonFeed } from "./jsonfeed";
+import type { SourceResult } from "./result";
+import { collectRss } from "./rss";
 import { collectWebsite } from "./website";
 
 export interface CollectResult {
@@ -11,6 +14,12 @@ export interface CollectResult {
 
 function subtractDays(date: Date, days: number): Date {
   return new Date(date.getTime() - days * 24 * 60 * 60 * 1000);
+}
+
+function latestItem(items: Item[]): Item {
+  return items.reduce((newest, item) =>
+    item.publishedAt > newest.publishedAt ? item : newest,
+  );
 }
 
 export async function collectAll(
@@ -30,26 +39,53 @@ export async function collectAll(
       : subtractDays(now, pipeline.cadence.bootstrapWindowDays);
 
     try {
-      if (source.type === "github_release" || source.type === "github_repo") {
-        const found = await collectGitHub(source, since, pipeline.limits.maxItemsPerSource);
-        items.push(...found);
-        if (found.length > 0) {
-          const newest = found
-            .map((item) => item.publishedAt)
-            .sort()
-            .at(-1);
-          state.sources[source.key] = {
-            lastSeenId: found[0].id,
-            lastSeenAt: newest,
-          };
-        }
-      } else if (source.type === "website") {
+      if (source.type === "website") {
         const result = await collectWebsite(source, previous?.lastSeenId);
         items.push(...result.items);
         state.sources[source.key] = {
           lastSeenId: result.seenId,
           lastSeenAt: now.toISOString(),
         };
+      } else {
+        const etag = previous?.etag;
+        let result: SourceResult;
+        if (source.type === "github_release") {
+          result = await collectGitHub(
+            source,
+            since,
+            pipeline.limits.maxItemsPerSource,
+            fetch,
+            etag,
+          );
+        } else if (source.type === "rss") {
+          result = await collectRss(
+            source,
+            since,
+            pipeline.limits.maxItemsPerSource,
+            fetch,
+            etag,
+          );
+        } else {
+          result = await collectJsonFeed(
+            source,
+            since,
+            pipeline.limits.maxItemsPerSource,
+            fetch,
+            etag,
+          );
+        }
+
+        items.push(...result.items);
+        const next: SourceState = { ...previous };
+        if (result.etag !== undefined) next.etag = result.etag;
+        if (result.items.length > 0) {
+          const latest = latestItem(result.items);
+          next.lastSeenId = latest.id;
+          next.lastSeenAt = latest.publishedAt;
+        }
+        if (result.items.length > 0 || result.etag !== undefined) {
+          state.sources[source.key] = next;
+        }
       }
       scanned += 1;
     } catch (error) {

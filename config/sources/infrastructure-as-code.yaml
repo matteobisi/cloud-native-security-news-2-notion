@@ -1,6 +1,7 @@
 category: infrastructure-as-code
 description: "Terraform, Pulumi, CloudFormation security, infrastructure automation, policy as code"
 priority: MEDIUM
+enabled: false
 
 sources:
   # IaC Frameworks

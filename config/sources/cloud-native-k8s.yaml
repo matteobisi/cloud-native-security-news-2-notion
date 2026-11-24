@@ -7,19 +7,47 @@ sources:
   - name: Kubernetes
     url: https://github.com/kubernetes/kubernetes/releases
     type: github_release
-    changelog: https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG
-    cve_feed: https://kubernetes.io/docs/reference/issues-security/official-cve-feed/
     notes: "Core K8s releases and security patches"
 
-  - name: Kubernetes KEPs
-    url: https://github.com/kubernetes/enhancements/tree/master/keps
-    type: github_repo
-    notes: "Kubernetes Enhancement Proposals - upcoming features"
+  - name: Kubernetes CVE feed
+    url: https://kubernetes.io/docs/reference/issues-security/official-cve-feed/index.json
+    type: json_feed
+    notes: "Official Kubernetes CVE feed (JSON Feed)"
+
+  - name: Kubernetes blog
+    url: https://kubernetes.io/feed.xml
+    type: rss
+    priority: MEDIUM
+
+  - name: CNCF blog
+    url: https://www.cncf.io/blog/feed/
+    type: rss
+    priority: MEDIUM
 
   # Container Runtime
+  - name: runc
+    url: https://github.com/opencontainers/runc/releases
+    type: github_release
+
+  - name: crun
+    url: https://github.com/containers/crun/releases
+    type: github_release
+    priority: HIGH
+
+  - name: gVisor
+    url: https://github.com/google/gvisor/releases
+    type: github_release
+    priority: HIGH
+
+  - name: Kata Containers
+    url: https://github.com/kata-containers/kata-containers/releases
+    type: github_release
+    priority: HIGH
+
   - name: Apple Container
     url: https://github.com/apple/container/releases
     type: github_release
+    priority: MEDIUM
 
   - name: Podman
     url: https://github.com/containers/podman/releases
@@ -58,6 +86,26 @@ sources:
     url: https://github.com/coredns/coredns/releases
     type: github_release
 
+  - name: ingress-nginx
+    url: https://github.com/kubernetes/ingress-nginx/releases
+    type: github_release
+
+  - name: Traefik
+    url: https://github.com/traefik/traefik/releases
+    type: github_release
+    priority: HIGH
+
+  - name: Gateway API
+    url: https://github.com/kubernetes-sigs/gateway-api/releases
+    type: github_release
+    priority: HIGH
+
+  # Workload Identity
+  - name: SPIFFE/SPIRE
+    url: https://github.com/spiffe/spire/releases
+    type: github_release
+    priority: HIGH
+
   # Certificate Management
   - name: cert-manager
     url: https://github.com/cert-manager/cert-manager/releases
@@ -67,15 +115,26 @@ sources:
     url: https://github.com/cert-manager/trust-manager/releases
     type: github_release
 
+  # Runtime Security
+  - name: KubeArmor
+    url: https://github.com/kubearmor/KubeArmor/releases
+    type: github_release
+    priority: HIGH
+
+  - name: Tracee
+    url: https://github.com/aquasecurity/tracee/releases
+    type: github_release
+    priority: HIGH
+
+  - name: security-profiles-operator
+    url: https://github.com/kubernetes-sigs/security-profiles-operator/releases
+    type: github_release
+    priority: HIGH
+
   # Backup & Disaster Recovery
   - name: Velero
     url: https://github.com/vmware-tanzu/velero/releases
     type: github_release
-
-  - name: Kasten K10
-    url: https://docs.kasten.io/latest/releasenotes.html
-    type: website
-    notes: "Check release notes page"
 
   # Developer Tools & Package Managers
   - name: Helm
@@ -85,11 +144,14 @@ sources:
   - name: Kustomize
     url: https://github.com/kubernetes-sigs/kustomize/releases
     type: github_release
+    priority: MEDIUM
 
   - name: Skaffold
     url: https://github.com/GoogleContainerTools/skaffold/releases
     type: github_release
+    priority: MEDIUM
 
   - name: Tilt
     url: https://github.com/tilt-dev/tilt/releases
     type: github_release
+    priority: MEDIUM

@@ -22,6 +22,16 @@ sources:
     url: https://github.com/external-secrets/external-secrets/releases
     type: github_release
 
+  - name: SOPS
+    url: https://github.com/getsops/sops/releases
+    type: github_release
+    priority: HIGH
+
+  - name: Sealed Secrets
+    url: https://github.com/bitnami-labs/sealed-secrets/releases
+    type: github_release
+    priority: HIGH
+
   # Access Control & Policy
   - name: HashiCorp Boundary
     url: https://github.com/hashicorp/boundary/releases
@@ -39,10 +49,20 @@ sources:
     url: https://github.com/open-policy-agent/gatekeeper/releases
     type: github_release
 
+  - name: Kubewarden
+    url: https://github.com/kubewarden/kubewarden/releases
+    type: github_release
+    priority: HIGH
+
   # Vulnerability Scanning & SBOM
   - name: Trivy
     url: https://github.com/aquasecurity/trivy/releases
     type: github_release
+
+  - name: Trivy Operator
+    url: https://github.com/aquasecurity/trivy-operator/releases
+    type: github_release
+    priority: HIGH
 
   - name: Grype
     url: https://github.com/anchore/grype/releases
@@ -54,6 +74,12 @@ sources:
     type: github_release
     notes: "SBOM generation tool"
 
+  - name: Harbor
+    url: https://github.com/goharbor/harbor/releases
+    type: github_release
+    priority: HIGH
+    notes: "Registry with vulnerability scanning"
+
   # Runtime Security & Monitoring
   - name: Falco
     url: https://github.com/falcosecurity/falco/releases
@@ -64,12 +90,22 @@ sources:
     type: github_release
     notes: "eBPF-based security observability"
 
-  # Code & IaC Scanning
-  - name: Checkov
-    url: https://github.com/bridgecrewio/checkov/releases
-    type: github_release
-
   # Signing & Supply Chain
   - name: Cosign
     url: https://github.com/sigstore/cosign/releases
     type: github_release
+
+  - name: sigstore
+    url: https://github.com/sigstore/sigstore/releases
+    type: github_release
+    priority: HIGH
+
+  - name: SLSA
+    url: https://github.com/slsa-framework/slsa/releases
+    type: github_release
+    priority: HIGH
+
+  - name: in-toto
+    url: https://github.com/in-toto/in-toto/releases
+    type: github_release
+    priority: HIGH

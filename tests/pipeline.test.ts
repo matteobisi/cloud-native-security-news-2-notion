@@ -14,7 +14,6 @@ const NOW = new Date("2026-03-31T00:00:00.000Z");
 
 function pipelineConfig(overrides: Partial<PipelineConfig["cadence"]> = {}): PipelineConfig {
   return {
-    categories: ["cloud-native-k8s"],
     cadence: {
       minQualifyingItems: 3,
       forcePublishAfterDays: 30,
@@ -108,6 +107,7 @@ function harness(options: HarnessOptions = {}): Harness {
   const env = options.env ?? {
     NOTION_TOKEN: "secret",
     NOTION_PARENT_PAGE_ID: "parent-1",
+    GITHUB_TOKEN: "gh-token",
   };
 
   return {
@@ -511,6 +511,27 @@ test("skips when nothing is buffered and persists state", async () => {
   assert.equal(result.exitCode, 0);
 });
 
+test("fails loudly when a GitHub source is enabled without a token", async () => {
+  const h = harness({
+    env: { NOTION_TOKEN: "secret", NOTION_PARENT_PAGE_ID: "parent-1" },
+  });
+
+  await assert.rejects(() => runPipeline(h.deps), {
+    message: "GITHUB_TOKEN must be set when a github_release Source is enabled",
+  });
+  assert.equal(h.published.length, 0);
+});
+
+test("does not require a GitHub token when no GitHub source is enabled", async () => {
+  const h = harness({ env: { NOTION_TOKEN: "secret", NOTION_PARENT_PAGE_ID: "parent-1" } });
+  h.deps.sources = [{ ...SOURCES[0], type: "rss" }];
+
+  const result = await runPipeline(h.deps);
+
+  assert.equal(result.status, "skipped-empty-buffer");
+  assert.equal(result.exitCode, 0);
+});
+
 test("fails loudly when the Notion environment is incomplete", async () => {
   const h = harness({
     collected: [item({ id: "one" }), item({ id: "two" }), item({ id: "three" })],
@@ -519,7 +540,7 @@ test("fails loudly when the Notion environment is incomplete", async () => {
       enriched({ id: "two", title: "two", url: "https://example.com/b" }),
       enriched({ id: "three", title: "three", url: "https://example.com/c" }),
     ],
-    env: { NOTION_TOKEN: "secret" },
+    env: { NOTION_TOKEN: "secret", GITHUB_TOKEN: "gh-token" },
   });
 
   await assert.rejects(() => runPipeline(h.deps), {

@@ -1,10 +1,4 @@
-categories:
-  - cloud-native-k8s
-  - security-tools
-  - compliance-scanning
-  - ci-cd-gitops
-  - container-build
-
+# Source categories are enabled in their own files (config/sources/*.yaml).
 cadence:
   # Publish only when at least this many qualifying items are buffered.
   minQualifyingItems: 3

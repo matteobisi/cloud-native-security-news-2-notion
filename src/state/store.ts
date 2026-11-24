@@ -5,6 +5,7 @@ import type { Digest, Item } from "../types";
 export interface SourceState {
   lastSeenId?: string;
   lastSeenAt?: string;
+  etag?: string;
 }
 
 export interface State {

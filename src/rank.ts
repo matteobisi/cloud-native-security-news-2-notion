@@ -1,19 +1,11 @@
 import type { EnrichedItem, Priority } from "./types";
+import { canonicalUrl } from "./url";
 
 const PRIORITY_ORDER: Record<Priority, number> = {
   CRITICAL: 0,
   HIGH: 1,
   MEDIUM: 2,
 };
-
-function canonicalUrl(url: string): string {
-  try {
-    const parsed = new URL(url);
-    return `${parsed.host}${parsed.pathname}`.replace(/\/$/, "").toLowerCase();
-  } catch {
-    return url.toLowerCase();
-  }
-}
 
 function titleKey(title: string): string {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();

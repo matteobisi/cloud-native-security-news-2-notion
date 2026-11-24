@@ -15,11 +15,12 @@ Collection is deterministic and the model only judges and writes, so runs are re
 - Docker Desktop with Docker Model Runner enabled (Docker 4.40+ on macOS; this project targets Docker 29 / Compose v5).
 - Apple Silicon with ~32 GB unified memory (default model `ai/gemma3:12b-q4_K_M`, ~8.2 GB).
 - A Notion integration token with insert-content permission, and a parent page shared with that integration.
+- A GitHub token: required for any run that includes GitHub Sources, and it raises the API limit from 60 to 5,000 requests per hour.
 
 ## Setup
 
 ```sh
-cp .env.example .env      # fill in NOTION_TOKEN and NOTION_PARENT_PAGE_ID
+cp .env.example .env      # fill in NOTION_TOKEN, NOTION_PARENT_PAGE_ID and GITHUB_TOKEN
 npm install
 docker model pull ai/gemma3:12b-q4_K_M
 ```
@@ -47,9 +48,9 @@ Runs are stateless from the operator's point of view: `scripts/run.sh` starts Do
 
 ## Configuration
 
-- `config/sources/*.yaml` — source registry, unchanged from the original format. v1 uses the CRITICAL and HIGH categories only.
-- `config/pipeline.yaml` — categories, cadence thresholds, item limits, model, security signals, paths.
-- `.env` — secrets and model endpoint (gitignored).
+- `config/sources/*.yaml` — Source registry. Each file is a Category and enables itself with `enabled`; each entry is one endpoint with a Source type (`github_release`, `rss`, `json_feed`, `website`). Priority defaults per file and can be overridden per Source.
+- `config/pipeline.yaml` — cadence thresholds, item limits, model, security signals, paths.
+- `.env` — secrets and model endpoint (gitignored). `GITHUB_TOKEN` is required whenever a GitHub Source is enabled.
 
 ## Cadence
 

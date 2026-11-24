@@ -1,5 +1,5 @@
 category: compliance-scanning
-description: "CIS benchmarks, compliance tools, CVE databases, policy scanning"
+description: "CIS benchmarks, compliance tools, policy scanning"
 priority: HIGH
 
 sources:
@@ -18,26 +18,4 @@ sources:
   - name: Checkov
     url: https://github.com/bridgecrewio/checkov/releases
     type: github_release
-    notes: "Also listed in security-tools"
-
-  # Vulnerability Databases
-  - name: NIST NVD
-    url: https://nvd.nist.gov/
-    type: website
-    notes: "National Vulnerability Database - monitor for new CVEs"
-
-  - name: Linux CVEs
-    url: https://nvd.nist.gov/vuln/search/results?query=linux%20kernel
-    type: website
-    notes: "Linux kernel vulnerabilities"
-
-  # Security Research & Announcements
-  - name: CNCF Security TAG
-    url: https://github.com/cncf/tag-security
-    type: github_repo
-    notes: "CNCF Security Technical Advisory Group"
-
-  - name: Kubernetes Security Announcements
-    url: https://groups.google.com/g/kubernetes-security-announce
-    type: mailing_list
-    notes: "Official K8s security announcements"
+    notes: "Moved from security-tools: one Source per endpoint"

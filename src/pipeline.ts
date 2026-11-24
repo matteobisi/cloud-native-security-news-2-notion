@@ -139,6 +139,10 @@ export async function runPipeline(
   const token = env.get("NOTION_TOKEN");
   const parentPageId = env.get("NOTION_PARENT_PAGE_ID");
 
+  if (sources.some((source) => source.type === "github_release") && !env.get("GITHUB_TOKEN")) {
+    throw new Error("GITHUB_TOKEN must be set when a github_release Source is enabled");
+  }
+
   if (!dryRun && token && parentPageId && store.listPending && store.removePending) {
     for (const pending of store.listPending()) {
       try {

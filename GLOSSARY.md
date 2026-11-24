@@ -17,12 +17,20 @@ A named grouping of sources (e.g. `cloud-native-k8s`, `security-tools`), declare
 _Avoid_: Topic, section
 
 **Priority**:
-A source's importance tier — CRITICAL, HIGH, or MEDIUM — used to decide what is worth including.
+A source's importance tier — CRITICAL, HIGH, or MEDIUM — declared per file as a default and optionally overridden per Source, used to decide what is worth including.
 _Avoid_: Severity, rank
 
 **Source type**:
-The shape of a source's content — `github_release`, `github_repo`, `website`, or `mailing_list` — which determines how it is read.
-_Avoid_: Kind, format
+The adapter that reads a Source's endpoint — `github_release`, `rss`, `json_feed`, or `website`.
+_Avoid_: Kind, format, feed type
+
+**Enabled source**:
+A Source whose category and entry are both enabled; only enabled Sources are collected.
+_Avoid_: Active source, live source
+
+**Dormant**:
+A category or Source marked `enabled: false`; retained for reference but never collected, and not validated beyond YAML parsing.
+_Avoid_: Disabled, inactive
 
 **Item**:
 A single new piece of content discovered at a source, such as one release or one announcement.

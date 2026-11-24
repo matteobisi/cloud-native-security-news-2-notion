@@ -8,11 +8,6 @@ sources:
     url: https://github.com/containers/buildah/releases
     type: github_release
 
-  - name: Kaniko
-    url: https://github.com/GoogleContainerTools/kaniko/releases
-    type: github_release
-    notes: "Build container images in Kubernetes"
-
   - name: BuildKit
     url: https://github.com/moby/buildkit/releases
     type: github_release
