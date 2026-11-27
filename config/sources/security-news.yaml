@@ -1,0 +1,36 @@
+category: security-news
+description: "Security research and news feeds covering supply chain, cloud-native, and OSS threats"
+priority: HIGH
+enabled: true
+
+sources:
+  - name: OpenSourceMalware
+    url: https://opensourcemalware.com/rss.xml
+    type: rss
+    notes: "OSS supply-chain malware research and threat intelligence"
+
+  - name: Socket Security Blog
+    url: https://socket.dev/api/blog/feed.atom
+    type: rss
+    notes: "Supply-chain and package security research (Atom feed)"
+
+  - name: StepSecurity Blog
+    url: https://www.stepsecurity.io/blog/rss.xml
+    type: rss
+    notes: "CI/CD and GitHub Actions supply-chain security research"
+
+  - name: Chainguard Unchained
+    url: https://www.chainguard.dev/unchained/rss.xml
+    type: rss
+    notes: "Container and software supply-chain security research"
+
+  - name: Datadog Security Labs
+    url: https://securitylabs.datadoghq.com/rss/feed.xml
+    type: rss
+    notes: "Cloud and application security research"
+
+  - name: Wiz Blog
+    url: https://www.wiz.io/feed/rss.xml
+    type: rss
+    priority: MEDIUM
+    notes: "Cloud security research; broader coverage, lower default priority"

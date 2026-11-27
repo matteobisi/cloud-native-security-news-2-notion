@@ -209,4 +209,20 @@ test("the repository's real registry loads", () => {
   }
   assert.ok(sources.some((source) => source.name === "Kubernetes CVE feed" && source.type === "json_feed"));
   assert.ok(sources.some((source) => source.name === "Jenkins security advisories" && source.type === "rss"));
+  assert.ok(
+    sources.some(
+      (source) =>
+        source.key === "security-news:OpenSourceMalware" &&
+        source.type === "rss" &&
+        source.priority === "HIGH",
+    ),
+  );
+  assert.ok(
+    sources.some(
+      (source) =>
+        source.key === "security-news:Wiz Blog" &&
+        source.type === "rss" &&
+        source.priority === "MEDIUM",
+    ),
+  );
 });
